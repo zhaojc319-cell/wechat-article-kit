@@ -1,0 +1,69 @@
+{
+  "title": "诗中有景，画里有光",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "诗中有景，画里有光。用三首古诗与六幅画，试一试自己的图文排版。"
+    },
+    {
+      "type": "heading",
+      "text": "山居秋暝 · 王维"
+    },
+    {
+      "type": "paragraph",
+      "text": "空山新雨后，天气晚来秋。\n明月松间照，清泉石上流。\n竹喧归浣女，莲动下渔舟。\n随意春芳歇，王孙自可留。"
+    },
+    {
+      "type": "images",
+      "files": [
+        "images/01.jpg",
+        "images/02.jpg"
+      ],
+      "alts": [
+        "Wheat Field with Cypresses",
+        "Haystacks: Autumn"
+      ],
+      "caption": "Wheat Field with Cypresses / Haystacks: Autumn。图片：The Metropolitan Museum of Art，CC0。"
+    },
+    {
+      "type": "heading",
+      "text": "鹿柴 · 王维"
+    },
+    {
+      "type": "paragraph",
+      "text": "空山不见人，但闻人语响。\n返景入深林，复照青苔上。"
+    },
+    {
+      "type": "images",
+      "files": [
+        "images/03.jpg",
+        "images/04.jpg"
+      ],
+      "alts": [
+        "Women Picking Olives",
+        "Roses"
+      ],
+      "caption": "Women Picking Olives / Roses。图片：The Metropolitan Museum of Art，CC0。"
+    },
+    {
+      "type": "heading",
+      "text": "竹里馆 · 王维"
+    },
+    {
+      "type": "paragraph",
+      "text": "独坐幽篁里，弹琴复长啸。\n深林人不知，明月来相照。"
+    },
+    {
+      "type": "images",
+      "files": [
+        "images/05.jpg",
+        "images/06.jpg"
+      ],
+      "alts": [
+        "Sunflowers",
+        "Self-Portrait with a Straw Hat (obverse: The Potato Peeler)"
+      ],
+      "caption": "Sunflowers / Self-Portrait with a Straw Hat (obverse: The Potato Peeler)。图片：The Metropolitan Museum of Art，CC0。"
+    }
+  ]
+}

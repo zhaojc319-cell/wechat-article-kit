@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>{{PAGE_TITLE}}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4f0;color:#30372d;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+.tools{background:#f8faf5;border-bottom:1px solid #dde2d6;padding:20px 24px}
+.bar{max-width:900px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+h1{font-size:20px;margin:0 0 8px}.meta{font-size:13px;color:#687060}
+button{font:inherit;border:0;border-radius:10px;background:#344b2d;color:#fff;padding:14px 22px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+#status,.help{max-width:900px;margin:12px auto 0;font-size:13px;line-height:1.8}
+.help{padding:0 20px;margin:24px auto;color:#687060;max-width:760px}
+#article{max-width:960px;margin:0 auto 48px;background:white}#article img{max-width:100%}
+@media(max-width:600px){.bar{flex-direction:column;align-items:flex-start}.tools{padding:18px 16px}button{width:100%}.help{margin:16px auto}}
+@media print{.tools,.help{display:none}body{background:white}}
+</style>
+</head>
+<body>
+<header class="tools">
+ <div class="bar"><div><h1>我的图文排版工具</h1><div id="meta" class="meta">正在检查正文</div></div><button id="copy" disabled>复制正文（含图片）</button></div>
+ <p id="status" role="status" aria-live="polite">正在检查图片…</p>
+</header>
+<p class="help">点击复制后，在公众号正文编辑区正常粘贴（Mac：⌘V，Windows：Ctrl+V），不要选择“粘贴为纯文本”。待图片载入后检查版式；并排图片可能变为上下排列。标题、摘要和封面另行填写或上传。本页不登录公众号、不上传文章、不保存草稿、不发布。</p>
+<main id="article">{{ARTICLE}}</main>
+<script>
+'use strict';
+const article = document.querySelector('#article');
+const statusLine = document.querySelector('#status');
+const copyButton = document.querySelector('#copy');
+const sizeLimit = 10000000; // 本工具保护阈值，不代表微信官方限制。
+let ready = false;
+function fragment() {
+  return {html:article.innerHTML, text:article.innerText};
+}
+function legacyCopy(data) {
+  let wrote = false;
+  const handler = event => {
+    if (!event.clipboardData) return;
+    event.preventDefault();
+    event.clipboardData.setData('text/html', data.html);
+    event.clipboardData.setData('text/plain', data.text);
+    wrote = true;
+  };
+  const selection = getSelection();
+  const old = [];
+  for (let i=0; i<selection.rangeCount; i++) old.push(selection.getRangeAt(i).cloneRange());
+  const focus = document.activeElement;
+  const range = document.createRange();
+  range.selectNodeContents(article);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  document.addEventListener('copy', handler);
+  try {
+    if (!document.execCommand('copy') || !wrote) throw new Error('浏览器未允许复制');
+  } finally {
+    document.removeEventListener('copy', handler);
+    selection.removeAllRanges();
+    old.forEach(item => selection.addRange(item));
+    if (focus && typeof focus.focus === 'function') focus.focus({preventScroll:true});
+  }
+}
+copyButton.addEventListener('click', async () => {
+  if (!ready) return;
+  const data = fragment();
+  if (new Blob([data.html]).size >= sizeLimit) {
+    statusLine.textContent = '正文达到本工具的10 MB保护阈值，请压缩图片后重新生成。';
+    return;
+  }
+  copyButton.disabled = true;
+  statusLine.dataset.result = 'copying';
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({
+          'text/html':new Blob([data.html],{type:'text/html'}),
+          'text/plain':new Blob([data.text],{type:'text/plain'})
+        })]);
+      } catch (_) { legacyCopy(data); }
+    } else { legacyCopy(data); }
+    statusLine.textContent = '正文已写入剪贴板。请到公众号粘贴，等待图片加载并检查版式；这不代表公众号已成功接收。';
+    statusLine.dataset.result = 'copied';
+  } catch (_) {
+    statusLine.textContent = '复制失败。请用桌面浏览器直接打开网页并点击按钮，检查剪贴板权限；本地文件失败时可尝试 localhost 或 HTTPS 页面。';
+    statusLine.dataset.result = 'failed';
+  } finally { copyButton.disabled = false; }
+});
+const images = [...article.querySelectorAll('img')];
+Promise.resolve().then(() => Promise.all(images.map(image => {
+  if (!(image.getAttribute('src') || '').startsWith('data:image/')) throw new Error('图片未内嵌');
+  return image.decode();
+}))).then(() => {
+  if (images.some(image => !image.naturalWidth)) throw new Error('图片损坏');
+  const bytes = new Blob([fragment().html]).size;
+  if (bytes >= sizeLimit) throw new Error('正文过大，请压缩图片后重新生成');
+  document.querySelector('#meta').textContent = `${images.length} 张图片 · 正文 ${(bytes/1000000).toFixed(2)} MB`;
+  statusLine.textContent = '正文已准备好，可复制到公众号。';
+  statusLine.dataset.ready = 'true';
+  ready = true;
+  copyButton.disabled = false;
+}).catch(() => {
+  statusLine.textContent = '正文未准备好：图片损坏、未内嵌或正文过大。请让 AI 检查材料后重新生成。';
+  statusLine.dataset.ready = 'false';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "body_font_size": 16,
+  "heading_font_size": 22,
+  "line_height": 1.8,
+  "paragraph_gap": 18,
+  "heading_gap": 32,
+  "image_gap": 8,
+  "content_width": 680,
+  "side_padding": 18,
+  "text_color": "#30372d",
+  "accent_color": "#344b2d",
+  "image_layout": "columns"
+}
